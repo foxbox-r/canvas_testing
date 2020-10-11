@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        body{padding:0;}
+        canvas{margin:0;padding:0;}
+        #info_box{position:fixed;width:100%;height:100%;background-color:rgba(0,0,0,0.89);color:white;transition:all .25s;top:-100%;text-align:center;}
+        #info_box #title{}
+        #info_box #img_img{width:200px;}
+        #info_box #desc{width:50%;margin:0 auto;}
+    </style>
+</head>
+<body>
+    <div id="info_box">
+        <h2 id="title">title</h2>
+        <hr />
+        <img id="img_img" src="./img/1.jpg"/>
+        <p id="desc">desc</p>
+        <input type="button" id="up_but" value="up" />
+    </div>
+
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script src="my_module/camera_moving.js"></script>
+    <script src="my_module/base_setting.js"></script>
+    <script src="my_module/base_structor.js"></script>
+    <script src="my_module/light.js"></script>
+    <script src="my_module/loader.js"></script>
+    <script src="my_module/mesh.js"></script>
+    <script src="my_module/mouse.js"></script>
+    <script>
+        let up_but = document.querySelector("#up_but");
+        let info_box = document.querySelector("#info_box");
+        let title = document.querySelector("#title");
+        let img_img = document.querySelector("#img_img");
+        let desc = document.querySelector("#desc");
+        let img_arr = [];
+        mk_box(30,30,1,0xffffff,15,15,0);
+        mk_box(1,30,30,0xffffff,0,15,15);
+        mk_box(30,30,1,0xffffff,15,15,30);
+        setPosition(camera,107,19,20);
+        camera.rotation.y = 1.7;
+
+        function img_func(_img_src,_title,_desc){
+            // console.log("=>",img_src,title,desc);
+            // console.log(img_img,title,desc);
+            img_img.src = _img_src;
+            title.innerText = _title;
+            desc.innerText = _desc;
+            info_box.style.top = 0;
+        }
+
+        load("/img/1.jpg",(t)=>{
+            var cube = new THREE.Mesh( 
+        new THREE.BoxGeometry( 5, 5, 1 ),
+        new THREE.MeshStandardMaterial( {map: t} )
+            );
+            setPosition(cube,18,18,1);
+            scene.add(cube);
+            cube.info = "01";
+            cube.img_src = "img/1.jpg";
+            cube.img_title = "모나리자";
+            cube.img_desc = `모나리자 또는 라 조콘다는 16세기 르네상스 시대에 레오나르도 다 빈치가 그린 초상화로, 현재 프랑스 파리 루브르 박물관에 전시되어 있다. "모나"는 유부녀 이름 앞에 붙이는 이탈리아어 경칭이고, "리자"는 초상화의 모델이 된 여인의 이름이다.`;
+            img_arr.push(cube);
+        });
+        load("/img/4.png",(t)=>{
+            var cube = new THREE.Mesh( 
+        new THREE.BoxGeometry( 5, 5, 1 ),
+        new THREE.MeshStandardMaterial({map: t})
+            );
+            setPosition(cube,18,18,28);
+            scene.add(cube);
+            cube.info = "02";
+            cube.img_src = "img/4.png";
+            cube.img_title = "무제";
+            cube.img_desc = `<<무제>> 2020-08-03 전혜윤이 꽃한송이를 그린 그림이다.`;
+            img_arr.push(cube);
+        });
+        load("/img/3.jpg",(t)=>{
+            var cube = new THREE.Mesh( 
+        new THREE.BoxGeometry( 1, 5, 8 ),
+        new THREE.MeshStandardMaterial( {map: t} )
+            );
+            setPosition(cube,1,18,15);
+            scene.add(cube);
+            cube.info = "03";
+            cube.img_src = "img/3.jpg";
+            cube.img_title = "별이 빛나는 밤";
+            cube.img_desc = "《별이 빛나는 밤》은 네덜란드의 화가 빈센트 반 고흐의 가장 널리 알려진 작품이다. 정신병을 앓고 있을 당시의 고흐가 그린 작품이다. 1889년 상 레미의 정신병원에서 나와 기억으로 그린 그림이지만, 당시 고흐는 정신장애로 인한 고통을 떠올려 그림 속의 소용돌이로 묘사했다";
+            img_arr.push(cube);
+        });
+
+        up_but.addEventListener("click",(e)=>{
+            info_box.style.top = "-100%";
+        });
+        // mk_axes(20);
+        
+        // setPosition(axesHelper,3,3,3);
+        start();
+    </script>
+</body>
+</html>

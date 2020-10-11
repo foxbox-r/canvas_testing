@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title>캔바스 샘플#2</title>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="500"></canvas>
+    <script>
+let cv = document.querySelector("#canvas");
+let ctx = cv.getContext("2d");
+let max = 150;
+let arr = [];
+
+function random(x){
+    return x * Math.random();
+}
+
+function set_snow(){
+    this.x = random(cv.width);
+    this.y = random(cv.height);
+    this.r = random(10);
+    this.sp = random(4);
+    this.color = "#"+Math.floor(random(0xffffff)).toString(16);
+} 
+
+set_snow.prototype.update = function (){
+    if(this.y > cv.height) this.y = -10;
+    this.y += this.sp;
+}
+
+function init(){
+    ctx.strokeStyle = "#f00";
+    ctx.strokeRect(0,0,cv.width-1,cv.height-1);
+    ctx.fillStyle = "#000";
+    ctx.fillRect(1,1,cv.width-2,cv.height-2);
+    for(var i=0;i<max;i++){
+        arr[i] = new set_snow();
+    }
+};
+
+init();
+function clear(){
+    ctx.fillStyle = "#000";
+    ctx.fillRect(1,1,cv.width-2,cv.height-2);
+}
+function draw(){
+    clear();
+    for(var i=0;i<max;i++){
+        let snow = arr[i];
+        ctx.beginPath();
+        ctx.fillStyle = snow.color;
+        ctx.arc(snow.x,snow.y,snow.r,0,Math.PI * 2);
+        ctx.closePath();
+        ctx.fill();
+        snow.update();
+    }
+}
+
+setInterval(draw,100);
+    </script>
+</body>
+</html>

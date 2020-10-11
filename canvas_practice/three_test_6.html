@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <script src="https://threejs.org/build/three.min.js"></script>
+    <script src="my_module/camera_moving.js"></script>
+    <script src="my_module/base_setting.js"></script>
+    <script src="my_module/base_structor.js"></script>
+    <script src="my_module/light.js"></script>
+    <script src="my_module/loader.js"></script>
+    <script>
+
+load("img/stone.jpg",(texture)=>{
+    mesh = new THREE.Mesh(new THREE.BoxGeometry(3,3,3),new THREE.MeshStandardMaterial({map:texture}));
+    setPosition(mesh,10,10,10);
+    scene.add(mesh);
+});
+    
+start();
+    </script>
+</body>
+</html>

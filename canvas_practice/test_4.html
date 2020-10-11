@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="500"></canvas>
+    <script>
+        let cv = document.querySelector("#canvas");
+        let ctx = cv.getContext("2d");
+        let baseColor = "#f8f8f8";
+        let arr = [];
+        let max = 100;
+
+    function random(x){
+        return x*Math.random();
+    }
+    function mk_ball(){
+        this.x = random(cv.width);
+        this.y = random(cv.height);
+        this.r = random(30);
+        this.sx = random(10);
+        this.sy = random(10);
+        this.color = "#"+Math.floor(random(0xffffff)).toString(16);
+    }
+
+    mk_ball.prototype.update = function(){
+        if(this.x-this.r/2<=0 || this.x+this.r/2 >= cv.width){
+            this.sx = this.sx * -1;
+        }
+        if(this.y-this.r/2<=0 || this.y +this.r/2>= cv.height){
+            this.sy = this.sy * -1;
+        }
+        this.x += this.sx;
+        this.y += this.sy;
+    }
+    mk_ball.prototype.clickEvent = function(i,e){
+        this.x = e.clientX;
+        this.y = e.clientY;
+        this.r = random(30);
+        this.sx = i%2==0?random(10):random(10)*-1;
+        this.sy = i%2==0?random(10):random(10)*-1;
+        this.color = "#"+Math.floor(random(0xffffff)).toString(16);
+    }
+
+    function clear(color){
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(0,0,cv.width-1,cv.height-1);
+        ctx.fillStyle = color;
+        ctx.fillRect(1,1,cv.width-2,cv.height-2);
+    }
+
+    function init(color){
+        ctx.strokeStyle = "#000";
+        ctx.strokeRect(0,0,cv.width-1,cv.height-1);
+        clear(color);
+        for(var i=0;i<max;i++){
+            arr[i] = new mk_ball();
+        }
+    }
+
+    init(baseColor);
+
+    function draw_ball(ball){
+        
+        ctx.beginPath();
+        ctx.arc(ball.x,ball.y,ball.r,0,Math.PI * 2);
+        ctx.closePath();
+        ctx.fillStyle = ball.color;
+        ctx.fill();
+        ball.update();
+    }
+
+    function draw(){
+        clear(baseColor);
+        for(var i=0;i<max;i++){
+            draw_ball(arr[i]);
+        }
+    };
+    
+    function update(){
+        draw();
+    };
+    cv.addEventListener("click",function(e){
+        console.log(e);
+        for(var i in arr){
+            arr[i].clickEvent(i,e);
+        }
+    });
+
+    setInterval(update,50);
+    alert("click this canvas");
+    </script>
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
+<body>
+    <canvas id="canvas" width="800" height="500"></canvas>
+    <script>
+        const row = 21;
+        const col = 12;
+        const blockSize = 15;
+        let time = 1000;
+        let keyboard = [];
+        let map = [];
+        let cv;
+        let ctx;
+        let nowBlock;
+        let block_arr = [
+            [
+                new mk_block_position(4,2),
+                new mk_block_position(-1,0),
+                new mk_block_position(0,-1),
+                new mk_block_position(0,1)
+            ],
+            [
+                new mk_block_position(4,2),
+                new mk_block_position(-1,0),
+                new mk_block_position(1,0),
+                new mk_block_position(2,0),
+            ],
+            [
+                new mk_block_position(4,2),
+                new mk_block_position(1,0),
+                new mk_block_position(0,-1),
+                new mk_block_position(-1,-1)
+            ],
+            [
+                new mk_block_position(4,2),
+                new mk_block_position(1,0),
+                new mk_block_position(0,-1),
+                new mk_block_position(-1,-1),
+            ],
+            [
+                new mk_block_position(4,3),
+                new mk_block_position(-1,0),
+                new mk_block_position(0,-1),
+                new mk_block_position(-1,-1),
+            ]
+        ];
+        let mt = {
+            no:0,
+            block:1,
+            now:3
+        }
+
+        function setMap(){
+            for(var i=0;i<row;i++){
+                map[i] = []
+                for(var j=0;j<col;j++){
+                    if(j===0||j===col-1||i===row-1)map[i][j] = mt.block;
+                    else map[i][j] = mt.no;
+                }
+            }
+        }
+
+        setMap();
+
+        function mk_block_position(x,y){//블럭 한칸 설정
+            this.x = x;
+            this.y = y;
+        }
+    
+        function mk_block_structor(arr){//블럭 
+            this.position_arr = arr;
+            nowBlock = this.position_arr;
+            console.log(nowBlock);
+        }
+
+        function change_position(position){//한블럭씩 회전
+            var temp = position.x;
+            position.x = position.y*-1;
+            position.y = temp;
+        }
+
+        function change_nowBlock(center,arr){//현재블럭이 멈춘후 새로운 블럭을 만든다.
+            console.log("reset nowPOsition");
+            map[center.y][center.x] = mt.block;
+            for(var i=1;i<arr.length;i++){
+                let block = arr[i];
+                map[center.y + block.y][center.x + block.x] = mt.block;
+            }
+            let n = Math.floor(random(block_arr.length));
+            // console.log(n);
+            a = new mk_block_structor(block_arr[n]);
+        }
+
+        function checkBlock(center,arr){//한블럭씩 그다음 좌표가 블럭타입이면 false 아니면 true 리턴
+            if(map[center.y+1][center.x] === mt.block){console.log("center no",map[center.y+1][center.x]);change_nowBlock(center,arr);return false;}
+            for(var i=1;i<arr.length;i++){
+                let block = arr[i];
+                if(map[center.y + block.y+1][center.x + block.x] === mt.block){console.log("blcok no",map[center.y+1][center.x]);change_nowBlock(center,arr); return false;}
+            }
+            return true;
+        }
+
+        function reset_nowBlock_position(center,arr){//현재 블럭을 지운다.
+            map[center.y][center.x] = mt.no;
+            for(var i=1;i<arr.length;i++){
+                let block = arr[i];
+                map[center.y + block.y][center.x + block.x] = mt.no;
+            }
+        }
+
+        mk_block_structor.prototype.rotate = function(){
+            let arr = this.position_arr;
+            let center = arr[0];
+            if(checkBlock(center,arr)){
+                reset_nowBlock_position(center,arr);
+                for(var i=1;i<arr.length;i++){
+                    change_position(arr[i]);
+                }
+            }
+        };
+        
+        mk_block_structor.prototype.left = function(){
+            let arr = this.position_arr;
+            let center = arr[0];
+            reset_nowBlock_position(center,nowBlock);
+            center.x--;
+            for(var i=1;i<nowBlock.length;i++){
+                    let block = nowBlock[i];
+                    map[center.y+block.y][center.x+block.x] = mt.now;
+                }
+        }; 
+        mk_block_structor.prototype.right = function(){
+            let arr = this.position_arr;
+            let center = arr[0];
+            reset_nowBlock_position(center,nowBlock);
+            center.x++;
+            for(var i=1;i<nowBlock.length;i++){
+                    let block = nowBlock[i];
+                    map[center.y+block.y][center.x+block.x] = mt.now;
+                }
+        }; 
+        mk_block_structor.prototype.down = function(){
+            let arr = this.position_arr;
+            let center = arr[0];
+            reset_nowBlock_position(center,nowBlock);
+            center.y++;
+            for(var i=1;i<nowBlock.length;i++){
+                    let block = nowBlock[i];
+                    map[center.y+block.y][center.x+block.x] = mt.now;
+                }
+        }; 
+        a = new mk_block_structor(block_arr[Math.floor(random(block_arr.length))]);
+        function clear(){
+            ctx.strokeStyle = "#000";
+            ctx.strokeRect(0,0,cv.width-1,cv.height-1);
+            ctx.fillStyle = "#f8f8f8";
+            ctx.fillRect(1,1,cv.width-2,cv.heigt-2);
+        }
+
+        (function init(){
+            cv = document.querySelector("#canvas");
+            ctx = cv.getContext("2d");
+            clear();
+        })();
+
+        function random(x){
+            return Math.random()*x;
+        }
+
+        function drawBlock(x,y,row,col){
+            let block = map[row][col];
+            switch(block){
+                case mt.now:ctx.fillStyle = "#"+Math.floor(random(0xffffff)).toString(16);break;
+                case mt.no:ctx.fillStyle = "#fff"; break;
+                case mt.block:ctx.fillStyle = "#000";break;
+            }
+            ctx.fillRect(x+3,y+3,blockSize-3,blockSize-3);
+            ctx.strokeRect(x+3,y+3,blockSize-3,blockSize-3);
+        }
+
+        function setNowBlock(){//현재블럭의 다음블럭 세팅
+            let center = nowBlock[0];
+            console.log("aa");
+            if(checkBlock(center,nowBlock)){
+                console.log("bb");
+                reset_nowBlock_position(center,nowBlock);
+                center.y++;
+                map[center.y][center.x] = mt.now;
+                for(var i=1;i<nowBlock.length;i++){
+                    let block = nowBlock[i];
+                    map[center.y+block.y][center.x+block.x] = mt.now;
+                }
+            }
+        }
+
+        function drawMap(){
+            setNowBlock();
+            for(let i = 0;i<row;i++){
+                for(let j=0;j<col;j++){
+                    let x = blockSize * j;
+                    let y = blockSize * i;
+                    drawBlock(x,y,i,j);
+                }
+            }
+        }
+        function update(){
+            clear();
+            drawMap();
+        }
+        let interval = setInterval(update,time);
+        document.body.addEventListener("keydown",function(e){
+            console.log(e.keyCode);
+            switch(e.keyCode){
+                case 37:a.left();break;//left
+                case 39:a.right();break;//right
+                case 38:a.rotate();break;//up
+                case 40:a.down(); break;//down
+                case 81:clearInterval(interval);break;//q
+            }
+        });
+        
+    </script>
+</body></html>

@@ -1,0 +1,184 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>all</title>
+        <style>
+            *{margin:0;padding:0;}
+        </style>
+    </head>
+    <body>
+        <script src="https://threejs.org/build/three.min.js"></script>
+        <script>
+
+            let scene = new THREE.Scene();
+            let camera = new THREE.PerspectiveCamera(45,window.innerWidth/window.innerHeight,0.1,1000);
+            var loader = new THREE.TextureLoader();
+
+            let renderer = new THREE.WebGLRenderer();
+            renderer.setSize(window.innerWidth,window.innerHeight);
+            document.body.appendChild( renderer.domElement );
+            renderer.shadowMapEnabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.gammaInput = true;
+            renderer.gammaOutput = true;
+
+            let pointLight_arr = [];
+            let box_arr = [];
+            function mk_pointLight(color,from,to,x,y,z){
+                let light = new THREE.PointLight(color,from,to);
+                light.position.set(x,y,z);
+                light.castShadow = true;
+                scene.add(light);
+                pointLight_arr.push(light);
+            } 
+
+            function mk_box(setting,x,y,z,flag,url){
+                loader.load(
+                    url, 
+                    function ( texture ) {
+                        var mesh = new THREE.Mesh(
+                            new THREE.BoxGeometry(setting[0], setting[1], setting[2]), 
+                            new THREE.MeshStandardMaterial({map: texture})
+                        );
+                        mesh.position.set(x,y,z);
+                        mesh.castShadow=true;
+                        mesh.receiveShadow=true;
+                        mesh.flag = flag;
+                        box_arr.push(mesh);
+                        scene.add(mesh);
+                    }
+                );
+            } 
+
+            function camera_go_front(){
+                let angle = camera.rotation.y;
+                let dis = 0.5;
+                camera.position.x -= Math.sin(angle)*dis;
+                camera.position.z -= Math.cos(angle)*dis;
+            }
+
+            function camera_go_back(){
+                let angle = camera.rotation.y;
+                let dis = 0.5;
+                camera.position.x += Math.sin(angle)*dis;
+                camera.position.z += Math.cos(angle)*dis;
+            }
+
+            function camera_go_left(){
+                let angle = camera.rotation.y-Math.PI/2;
+                let dis = 0.5;
+                camera.position.x += Math.sin(angle)*dis;
+                camera.position.z += Math.cos(angle)*dis;
+            }
+
+            function camera_go_right(){
+                let angle = camera.rotation.y+Math.PI/2;
+                let dis = 0.5;
+                camera.position.x += Math.sin(angle)*dis;
+                camera.position.z += Math.cos(angle)*dis;
+            }
+
+            function rotationMesh(mesh){
+                if(mesh.flag){
+                    mesh.rotation.y+=0.1;
+                    mesh.rotation.x+=0.1;
+                }
+            }
+
+            function arrRotation(arr){
+                for(var i in arr){
+                    rotationMesh(arr[i]);
+                }
+            }
+            let keyArr = [];
+            function keyEvent(){
+                if(keyArr[65])camera_go_left();//a
+                if(keyArr[68])camera_go_right();//d
+                if(keyArr[87])camera_go_front();//w
+                if(keyArr[83])camera_go_back();//s
+                if(keyArr[37])camera.rotation.y += 0.05;// <<== left
+                if(keyArr[39])camera.rotation.y -= 0.05;// ==>> right
+                if(keyArr[16])camera.position.y -= 0.1;//shift
+                if(keyArr[32])camera.position.y += 0.1;//space
+                if(keyArr[81]){//q
+                    console.log("Q");
+                }
+            }
+
+            function mk_axes(x){
+                var axesHelper = new THREE.AxesHelper(x );
+                scene.add( axesHelper );
+            }
+
+            function mk_light_all(){
+                var light_base = new THREE.AmbientLight( 0xf0f0f0 );
+                scene.add( light_base );    
+            }
+
+            function mk_light_side(){
+                var light_sun = new THREE.DirectionalLight ( 0xff0000, 113.0 );
+                light_sun.position.set( 1000, 1000, 3000 );
+                // light_sun.castShadow=true;
+                shadowBlur=15;
+                light_sun.shadowCameraLeft=-shadowBlur;
+                light_sun.shadowCameraRight=shadowBlur;
+                light_sun.shadowCameraTop=shadowBlur;
+                light_sun.shadowCameraBottom=-shadowBlur;
+                scene.add( light_sun );
+            }
+
+            mk_axes(10);
+            // mk_light_all();
+            // mk_light_side();
+            mk_box([3,3,3],0,3,0,true,"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAclBMVEUAAAD///8gICDHx8eMjIzAwMCQkJCpqal7e3ubm5u4uLhzc3MmJib29vaenp5fX1+vr68xMTHd3d3U1NRHR0fOzs6np6fl5eVNTU1oaGiFhYWWlpYVFRXr6+sQEBBubm5SUlJaWlo1NTU/Pz9/f39JSUmV94PmAAAD0UlEQVR4nO3ca2+qQBSF4UFRLKKIaBUVa6v+/794FDmk9TS9zOzFHjzr+dQ0adM3Kc4FGGOIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiISMo+ybLj+rUoTqNNGIbDq6eb6uvL9zajU1G8no9Zluy1/9xv7M7pKNxGs3jQX87LSWBrUs6X/UE8i7bhKD3vtLMuYekwGuT2QT9IzgfRMNVJTaY5sOxePk1a7huvWsy7WY1b7FuUrfddlYu2Ap9U+q6e2glcqgUGwfLRA1tJjFQDgyBCBxbKgUFQgAuRw/vPTLCBU+2+iym0ULuuggwcacdVRsDCvnZcpQ8s1G6r4QIz7bRaBisMtdNqIaxwpp1Wm8EK59pptTmsUH9Cc4Ob1miXNVCBb9phjTdQ4Yt2WOMFVOjDtPsGNfn2ZbDADRcD7bDGAFToy3CIGxAth8Ox/O4qakC0/HP2gPmsX4U9I/8h5V+hyWTv42ACbVeHvduPp5KXI2aFeHArNGYjV3iAFKauhYKXYwoptN1oe1dodkJ3PTDbbbaf+b0Pv+VV5N4qZh9jK1JozElgIb2FFNouLe4LJe5fYRYXz2KFZu+6tfwMKbT9IPyk0Jiz2+WIWT6JFl4+ml0uR0xhLFvo9MRD3I1ChzU1ptD2z/mi0BwtV9WYRT6i0JjC6nLEFNp+wn9daHc5Ym4hogptrvCuFf5+fdy5wvS343/HCt9+v8PRrUKbcRZTiBkt7Fad3RkP7UZDVKH8rM12RtOZeantL4QVCq+ebDdFKh1YH764bdZgCgV3MY6uG26YXQyxnSjnXRrUTpTUbqLE4wCY3USZHWGn7ZkGZkdYYld/LfQ2EWZX3/3OjMAFWMPcmXG+uyb4qsYBUpi4FW4kn/sDvavnUihzy6mBCXQolLpt2PCrEPG4GKjQ8kJymmJ/DvXE0OM/9fX4T+49/tOX/jxBi3ofWP/tyr9Qb1n68lIQ8LUg7bAGKvA/eKOkzZMwvpLDCn0ZLnBvdgk+PulkAyvsaafVfnBH0pZ2Wg0X6MnMFDUrvfLj3S7Ue10VH0ZE7LERQ+28iyG00Oicn/ReiQ00a+3AYA0udLuxKQD8P3qlO3XDTdg8SYSfoXSjd4YL8tyWD3o6y6gcOB/9x7r9M82W8A/Re6O4vbGxjFv7/7yTFMMoXuJKy2UcDYu2j7381C45jE/htDqjtZ+vrA5pnZSrvF+dzzoNT+ND4sEBrd/b73pJdl4c0jQdX12P1r2ovr5877A4J0lv5/sJu0REREREREREREREREREREREREREREREREREsv4A4TxJr1ZXwCUAAAAASUVORK5CYII=");
+            mk_box([120,0.5,120],0,-1,0,false,"./img/stone.jpg")
+            mk_pointLight(0xff0000,1,100,5, 2, 0 );
+            mk_pointLight(0x00ff00,1,100,0,2,5);
+            mk_pointLight(0x0000ff,1,100,0,-5,0);
+            // mk_pointLight(0xffffff,1,100,-5,0,-5);
+            
+            var model;
+            // var loaderMesh = new THREE.ColladaLoader();
+            // loaderMesh.load(
+            //     '/img/test_01.dae',
+            //     function ( collada ){						
+            //         model = collada.scene;			
+            //         scene.add( model );
+            // });
+
+            // cloader.load( 'img/test_01.dae', function ( collada ) {
+            //         scene.add(collada.scene)
+            //         });
+
+
+            camera.position.set(10,3,10);
+            (function update(){
+                requestAnimationFrame(update);
+                renderer.render(scene,camera);
+                arrRotation(box_arr);
+                keyEvent();
+            })();
+
+            window.addEventListener( 'resize', onWindowResize, false );
+
+            function onWindowResize(){
+
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+
+                renderer.setSize( window.innerWidth, window.innerHeight );
+
+            }
+            document.body.addEventListener("keydown",function(e){
+                let code = e.keyCode;
+                console.log(code);
+                keyArr[code] = true;
+            });
+            document.body.addEventListener("keyup",function(e){
+                let code = e.keyCode;
+                keyArr[code] = false;
+            });
+        </script>
+    </body>
+</html>
