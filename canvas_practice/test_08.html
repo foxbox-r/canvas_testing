@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        canvas{border:2px solid black;}
+    </style>
+</head>
+<body>
+    <canvas width="500" height="500" id="canvas"></canvas>
+    <canvas width="500" height="500" id="canvas2"></canvas>
+    <canvas width="500" height="500" id="canvas3"></canvas>
+    <script>
+        
+const sleep = (time)=>new Promise(resolve=>setTimeout(resolve,time));
+
+    async    function draw() {
+  var ctx = document.getElementById('canvas').getContext('2d');
+  const numOfColor = 20;
+  const term = 255/numOfColor; 
+  for (var i = 0; i < numOfColor; i++){
+    for (var j = 0; j < numOfColor; j++){
+        // console.log(i,j);
+        await sleep(5);
+      ctx.fillStyle = 'rgb(' + Math.floor(255 - term * i) + ', ' +
+                       Math.floor(255 - term * j) + ', 0)';
+      ctx.fillRect(j*25,i*25,25,25);
+    }
+  }
+}
+function draw2() {
+  var ctx = document.getElementById('canvas2').getContext('2d');
+  const numOfColor = 20;
+  const term = 255/numOfColor; 
+  const dis = 25;
+  for (var i = 0; i < numOfColor; i++){
+    for (var j = 0; j < numOfColor; j++){
+        // console.log(i,j);
+      ctx.strokeStyle = 'rgb(' + Math.floor(255 - term * i) + ', ' +
+                       Math.floor(255 - term * j) + ', 0)';
+        ctx.beginPath();
+      ctx.arc(dis/2+dis*i,dis/2+dis*j,dis/2-2,0,Math.PI*2,false);
+      ctx.stroke();
+    }
+  }
+}
+
+
+function draw3(){
+    const ctx = document.querySelector("#canvas3").getContext("2d");
+    const side = 75;
+    
+    ctx.fillStyle = "red";
+    ctx.fillRect(0,0,side,side);
+    ctx.fillStyle = "green";
+    ctx.fillRect(side,0,side,side);
+    ctx.fillStyle = "blue";
+    ctx.fillRect(0,side,side,side);
+    ctx.fillStyle = "orange";
+    ctx.fillRect(side,side,side,side);
+
+    ctx.fillStyle = "pink";
+    // 투명값
+    ctx.globalAlpha = 0.2;
+
+    for(let i = 0;i<5;i++){
+        console.log(i);
+        ctx.arc(side,side,side-10*i,0,Math.PI,0,false);
+        ctx.fill();
+    }
+}
+draw();
+draw2();
+draw3();
+    </script>
+</body>
+</html>
