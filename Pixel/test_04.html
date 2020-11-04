@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        .box{
+            width:100px;
+            height:100px;
+            border:1px solid black;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            font-size:1rem;
+            margin:10px;
+            display:inline-block;
+        }
+        #pickColorBox{
+        }
+        #hoverColor{
+        }
+        canvas{
+            border:3px solid black;
+            margin:0;
+            display:inline;
+            width:100px;
+            height:100px;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="canvas" width="200" height="200" style="float:left"></canvas>
+    <canvas width="200" height="200" id="zoomBox"></canvas>
+    <canvas width="200" height="200" id="pick_zoom"></canvas>
+    <div class="box" id="pickColorBox"></div>
+    <div  class="box" id="hoverColor"></div>
+    <button id="change_button">change</button>
+    <button id="baw">black and white</button>
+    <button id="originButton">original</button>
+    
+    <script>
+        const pickColorBox = document.querySelector("#pickColorBox");
+        const hoverColor = document.querySelector("#hoverColor");
+        const change_button = document.querySelector("#change_button")
+        const baw = document.querySelector("#baw");
+        const originButton = document.querySelector("#originButton");
+        const zoomBox = document.querySelector("#zoomBox");
+        const zoomctx = zoomBox.getContext("2d");
+        const pickZoom = document.querySelector("#pick_zoom");
+        const pickZoomctx = pickZoom.getContext("2d");
+        const img = new Image();
+        img.src = "../img/img1.jpg"
+        const canvas = document.querySelector("#canvas");
+        const ctx = canvas.getContext("2d");
+        function draw(){
+            console.log("draw");
+            ctx.drawImage(img,0,0)
+        }
+        const getData = ()=>{
+            return ctx.getImageData(0,0,canvas.width,canvas.height);
+        }
+
+        const min255 = (data) =>{
+            return (255-data);
+        }
+        const change = ()=>{
+            const img = getData();
+            console.log(img)
+            const data = img.data;
+            console.log(data);
+            for(var i=0 ;i<data.length;i+= 4){
+                data[i] = min255(data[i]);
+                data[i+1] = min255(data[i+1]);
+                data[i+2] = min255(data[i+2]);
+            }
+            console.log(data);
+            return img;
+        }
+        const putImg = (data)=>{
+            ctx.putImageData(data,0,0);
+        }
+
+        const change2 = ()=>{
+            const img = getData();
+            console.log(img)
+            const data = img.data;
+            console.log(data);
+            for(var i=0 ;i<data.length;i+= 4){
+                avg = (data[i]+data[i+1]+data[i+2])/3
+                data[i] = avg
+                data[i+1] = avg
+                data[i+2] =avg
+            }
+            console.log(data);
+            return img;
+        }
+
+        const pick = (e,tag)=>{
+            const x = e.layerX*2;
+            const y = e.layerY*2;
+            console.log(x,y);
+            const imgData = ctx.getImageData(x,y,1,1);
+            const data = imgData.data;
+            const rgba = `rgba(${data[0]},${data[1]},${data[2]},${data[3]/255})`;
+            tag.style.background= rgba;
+            tag.innerText = rgba;
+        }
+
+        const zoom = (e,ctx)=>{
+            const side = 30;
+            const r = side/2;
+            const x = e.layerX*2;
+            const y = e.layerY*2;
+            const data = ctx.getImageData(x,y,10,10);
+            ctx.drawImage(canvas,Math.min(Math.max(0,x-r),img.width-r),Math.min(Math.max(0,y-r),img.height-r),side,side,0,0,canvas.width,canvas.height);
+        }
+
+        canvas.addEventListener("mousemove",e=>{
+            pick(e,hoverColor)
+            zoom(e,zoomctx);
+        });
+        canvas.addEventListener("click",e=>{
+            pick(e,pickColorBox)
+            zoom(e,pickZoomctx);
+        });
+        change_button.addEventListener("click",e=>{
+            putImg(change());
+        })
+        baw.addEventListener("click",e=>{
+            putImg(change2());
+        })
+        originButton.addEventListener("click",e=>{
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        })
+        window.onload = function(){
+            console.log("onLodad",img,0,0,canvas.with,canvas.height);
+            ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        }
+        console.log("Ed")
+
+    </script>
+</body>
+</html>
